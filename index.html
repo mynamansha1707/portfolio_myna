@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Myna — Product Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0d0d0b;
+    --cream: #f0ebe0;
+    --warm: #e8e0cc;
+    --muted: #8a8070;
+    --accent: #d4622a;
+    --accent2: #c4a86a;
+    --rule: rgba(240,235,224,0.12);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--cream);
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    cursor: none;
+    overflow-x: hidden;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    position: fixed;
+    width: 10px; height: 10px;
+    background: var(--accent);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s ease, width 0.2s ease, height 0.2s ease, background 0.2s ease;
+    mix-blend-mode: normal;
+  }
+  .cursor.big {
+    width: 40px; height: 40px;
+    background: transparent;
+    border: 1px solid var(--accent);
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.025;
+    pointer-events: none;
+    z-index: 9998;
+  }
+
+  /* Nav */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 48px;
+    background: linear-gradient(to bottom, rgba(13,13,11,0.95) 0%, transparent 100%);
+  }
+  .nav-logo {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+  }
+  .nav-links a {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--cream); }
+
+  /* Hero */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: end;
+    padding: 0 48px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(120px, 18vw, 260px);
+    font-weight: 900;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(240,235,224,0.04);
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+    letter-spacing: -0.02em;
+  }
+
+  .hero-left {
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.2s forwards;
+  }
+  .hero-label::before {
+    content: '';
+    width: 32px; height: 1px;
+    background: var(--accent);
+  }
+
+  .hero-name {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(52px, 7vw, 96px);
+    font-weight: 900;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    color: var(--cream);
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.4s forwards;
+  }
+  .hero-name em {
+    font-style: italic;
+    color: var(--accent2);
+  }
+
+  .hero-desc {
+    margin-top: 32px;
+    font-size: 15px;
+    color: var(--muted);
+    max-width: 380px;
+    line-height: 1.7;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.6s forwards;
+  }
+
+  .hero-cta {
+    margin-top: 48px;
+    display: flex;
+    gap: 16px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.8s forwards;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 1px solid;
+    transition: all 0.25s ease;
+  }
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--ink);
+  }
+  .btn-primary:hover {
+    background: transparent;
+    color: var(--accent);
+  }
+  .btn-ghost {
+    background: transparent;
+    border-color: var(--rule);
+    color: var(--muted);
+  }
+  .btn-ghost:hover {
+    border-color: var(--cream);
+    color: var(--cream);
+  }
+
+  .hero-right {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 1s forwards;
+  }
+
+  .stat-row {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 12px;
+    width: 280px;
+  }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--cream);
+    line-height: 1;
+  }
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* Marquee */
+  .marquee-wrap {
+    overflow: hidden;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 14px 0;
+    margin-bottom: 0;
+  }
+  .marquee-track {
+    display: flex;
+    gap: 48px;
+    white-space: nowrap;
+    animation: marquee 22s linear infinite;
+  }
+  .marquee-item {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 48px;
+  }
+  .marquee-item span { color: var(--accent); }
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* Sections */
+  section {
+    padding: 100px 48px;
+    position: relative;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    margin-bottom: 64px;
+  }
+  .section-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 700;
+    color: var(--cream);
+    line-height: 1.1;
+  }
+  .section-rule {
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+    margin-left: 20px;
+  }
+
+  /* About */
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+  .about-body {
+    font-size: 17px;
+    line-height: 1.8;
+    color: var(--warm);
+  }
+  .about-body p + p { margin-top: 20px; }
+  .about-body strong { color: var(--cream); font-weight: 600; }
+  .about-body .highlight {
+    color: var(--accent2);
+    font-style: italic;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .skills-block { display: flex; flex-direction: column; gap: 20px; }
+  .skill-category {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .skill-cat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .tag {
+    padding: 4px 12px;
+    border: 1px solid var(--rule);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    transition: all 0.2s;
+  }
+  .tag:hover {
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+
+  /* Work */
+  .work-list { display: flex; flex-direction: column; gap: 2px; }
+
+  .work-item {
+    display: grid;
+    grid-template-columns: 60px 1fr auto;
+    align-items: start;
+    gap: 32px;
+    padding: 36px 0;
+    border-bottom: 1px solid var(--rule);
+    transition: background 0.2s;
+    cursor: default;
+    position: relative;
+  }
+  .work-item::after {
+    content: '';
+    position: absolute;
+    left: -48px; right: -48px;
+    top: 0; bottom: 0;
+    background: rgba(240,235,224,0.02);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .work-item:hover::after { opacity: 1; }
+
+  .work-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--muted);
+    padding-top: 4px;
+  }
+  .work-body {}
+  .work-tags-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .work-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    padding: 2px 8px;
+    border: 1px solid rgba(212,98,42,0.3);
+  }
+  .work-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--cream);
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+  .work-org {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 14px;
+  }
+  .work-desc {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 580px;
+  }
+  .work-impact {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 180px;
+    text-align: right;
+  }
+  .impact-item {
+    padding: 12px 16px;
+    border: 1px solid var(--rule);
+  }
+  .impact-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--accent2);
+  }
+  .impact-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* Thinking / teardown */
+  .thinking-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+  }
+  .think-card {
+    padding: 40px;
+    border: 1px solid var(--rule);
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .think-card:hover { border-color: rgba(240,235,224,0.25); }
+  .think-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 0;
+    background: var(--accent);
+    transition: height 0.3s ease;
+  }
+  .think-card:hover::before { height: 100%; }
+  .think-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .think-q {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--cream);
+    margin-bottom: 16px;
+    line-height: 1.3;
+  }
+  .think-a {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.75;
+  }
+
+  /* Contact / CTA */
+  .cta-section {
+    padding: 120px 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(212,98,42,0.07) 0%, transparent 70%);
+  }
+  .cta-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 24px;
+    position: relative;
+  }
+  .cta-headline {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(40px, 6vw, 80px);
+    font-weight: 900;
+    line-height: 1;
+    color: var(--cream);
+    margin-bottom: 24px;
+    position: relative;
+  }
+  .cta-headline em { font-style: italic; color: var(--accent2); }
+  .cta-sub {
+    font-size: 15px;
+    color: var(--muted);
+    max-width: 420px;
+    margin-bottom: 48px;
+    position: relative;
+  }
+  .cta-buttons {
+    display: flex;
+    gap: 16px;
+    position: relative;
+  }
+
+  /* Footer */
+  footer {
+    padding: 32px 48px;
+    border-top: 1px solid var(--rule);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  footer p {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    nav { padding: 20px 24px; }
+    .nav-links { display: none; }
+    .hero { grid-template-columns: 1fr; padding: 0 24px 60px; padding-top: 100px; }
+    .hero-right { align-items: flex-start; }
+    .stat-row { width: 100%; }
+    section { padding: 64px 24px; }
+    .about-grid { grid-template-columns: 1fr; gap: 48px; }
+    .thinking-grid { grid-template-columns: 1fr; }
+    .work-item { grid-template-columns: 40px 1fr; }
+    .work-impact { display: none; }
+    footer { padding: 24px; flex-direction: column; gap: 12px; }
+    .cta-section { padding: 80px 24px; }
+    .cta-buttons { flex-direction: column; align-items: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-logo">Myna · Portfolio '25</div>
+  <ul class="nav-links">
+    <li><a href="#work">Work</a></li>
+    <li><a href="#thinking">Thinking</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-bg-text">PRODUCT</div>
+  <div class="hero-left">
+    <div class="hero-label">Available · Bangalore · 2025</div>
+    <h1 class="hero-name">Myna<br /><em>Mansha.</em></h1>
+    <p class="hero-desc">
+      CS engineer who thinks in systems, builds in data, and obsesses over the gap between what users say they want and what they actually need.
+    </p>
+    <div class="hero-cta">
+      <a href="#work" class="btn btn-primary">See my work ↓</a>
+      <a href="mailto:mynamansha1707@gmail.com" class="btn btn-ghost">Let's talk →</a>
+    </div>
+  </div>
+  <div class="hero-right">
+    <div class="stat-row">
+      <div class="stat-num">4+</div>
+      <div class="stat-label">End-to-end projects shipped</div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-num">3</div>
+      <div class="stat-label">Industries — energy, finance, health</div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-num">2x</div>
+      <div class="stat-label">Published research papers</div>
+    </div>
+  </div>
+</section>
+
+<!-- Marquee -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <div class="marquee-item">Python <span>·</span> SQL <span>·</span> Power BI <span>·</span> Product Thinking <span>·</span> Data Analysis <span>·</span> PRD Writing <span>·</span> User Research <span>·</span> Deep Learning <span>·</span> Business Strategy <span>·</span> Python <span>·</span> SQL <span>·</span> Power BI <span>·</span> Product Thinking <span>·</span> Data Analysis <span>·</span> PRD Writing <span>·</span> User Research <span>·</span> Deep Learning <span>·</span> Business Strategy <span>·</span></div>
+    <div class="marquee-item">Python <span>·</span> SQL <span>·</span> Power BI <span>·</span> Product Thinking <span>·</span> Data Analysis <span>·</span> PRD Writing <span>·</span> User Research <span>·</span> Deep Learning <span>·</span> Business Strategy <span>·</span> Python <span>·</span> SQL <span>·</span> Power BI <span>·</span> Product Thinking <span>·</span> Data Analysis <span>·</span> PRD Writing <span>·</span> User Research <span>·</span> Deep Learning <span>·</span> Business Strategy <span>·</span></div>
+  </div>
+</div>
+
+<!-- Work -->
+<section id="work">
+  <div class="section-header reveal">
+    <span class="section-num">01</span>
+    <h2 class="section-title">Selected Work</h2>
+    <div class="section-rule"></div>
+  </div>
+
+  <div class="work-list">
+
+    <div class="work-item reveal">
+      <div class="work-num">i.</div>
+      <div class="work-body">
+        <div class="work-tags-row">
+          <span class="work-tag">Industry</span>
+          <span class="work-tag">Data / Analytics</span>
+        </div>
+        <div class="work-title">Predictive Maintenance System — NALCO</div>
+        <div class="work-org">National Aluminium Company Ltd · Bhubaneswar</div>
+        <div class="work-desc">
+          Scoped and delivered a predictive and prescriptive maintenance solution for Heavy Earth Moving Machinery (HEMM) — one of NALCO's highest-cost operational risks. Designed the data pipeline in Python and SQL, built Power BI dashboards for ops teams, and wrote a formal User Requirement Specification to align engineering and management stakeholders. The system flags failure risk before breakdowns occur, shifting maintenance from reactive to intelligence-led.
+        </div>
+      </div>
+      <div class="work-impact">
+        <div class="impact-item">
+          <div class="impact-num">HEMM</div>
+          <div class="impact-label">Heavy machinery fleet</div>
+        </div>
+        <div class="impact-item">
+          <div class="impact-num">3-tier</div>
+          <div class="impact-label">Python · SQL · Power BI</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="work-item reveal">
+      <div class="work-num">ii.</div>
+      <div class="work-body">
+        <div class="work-tags-row">
+          <span class="work-tag">Research</span>
+          <span class="work-tag">AI / ML</span>
+        </div>
+        <div class="work-title">Autonomous Gold Trading via Hybrid Deep Learning</div>
+        <div class="work-org">Academic Research · KIIT University</div>
+        <div class="work-desc">
+          Built a novel framework combining CEEMDAN signal decomposition, FinBERT sentiment analysis, Attention-LSTM price prediction, and PPO reinforcement learning into a single automated trading pipeline — improving on baseline academic results. Led project scoping, literature review, methodology design, and coordinated implementation across a three-person team. Published as an IEEE Transactions-format paper.
+        </div>
+      </div>
+      <div class="work-impact">
+        <div class="impact-item">
+          <div class="impact-num">4-layer</div>
+          <div class="impact-label">Model architecture</div>
+        </div>
+        <div class="impact-item">
+          <div class="impact-num">IEEE</div>
+          <div class="impact-label">Publication format</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="work-item reveal">
+      <div class="work-num">iii.</div>
+      <div class="work-body">
+        <div class="work-tags-row">
+          <span class="work-tag">Research</span>
+          <span class="work-tag">Climate / Data</span>
+        </div>
+        <div class="work-title">Weather Forecasting with ConvLSTM Encoder-Decoder</div>
+        <div class="work-org">Academic Research · KIIT University</div>
+        <div class="work-desc">
+          Designed and trained a spatiotemporal deep learning model across 9 Indian cities using Open-Meteo API data. Managed the full project lifecycle: data acquisition strategy, model architecture decisions, result interpretation, and communication (research paper + executive presentation). Demonstrated that ConvLSTM outperforms traditional LSTM in capturing spatial weather dependencies.
+        </div>
+      </div>
+      <div class="work-impact">
+        <div class="impact-item">
+          <div class="impact-num">9</div>
+          <div class="impact-label">Cities modelled</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="work-item reveal">
+      <div class="work-num">iv.</div>
+      <div class="work-body">
+        <div class="work-tags-row">
+          <span class="work-tag">Analytics</span>
+          <span class="work-tag">Health</span>
+        </div>
+        <div class="work-title">Cardiovascular Disease Prediction</div>
+        <div class="work-org">Portfolio Project</div>
+        <div class="work-desc">
+          Built an SVM and Naive Bayes classifier on a Kaggle cardiovascular dataset to predict disease presence. Focused on interpretability — understanding which features drive predictions — rather than just accuracy. Used as a vehicle to practice communicating model results to non-technical stakeholders, framing the output as a decision-support tool rather than a black box.
+        </div>
+      </div>
+      <div class="work-impact">
+        <div class="impact-item">
+          <div class="impact-num">SVM</div>
+          <div class="impact-label">+ Naive Bayes</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Thinking -->
+<section id="thinking" style="background: rgba(255,255,255,0.015);">
+  <div class="section-header reveal">
+    <span class="section-num">02</span>
+    <h2 class="section-title">How I Think</h2>
+    <div class="section-rule"></div>
+  </div>
+
+  <div class="thinking-grid">
+    <div class="think-card reveal">
+      <div class="think-label">Product Instinct</div>
+      <div class="think-q">What's broken about how most AI tools handle calendar scheduling?</div>
+      <div class="think-a">They optimize for slot-finding, not intent. The real friction isn't "when are you free" — it's "what kind of meeting is this and does it need to happen at all." An AI agent that asks better questions upstream would reduce calendar load by 30% before touching availability. The scheduling feature is a band-aid on a prioritization problem.</div>
+    </div>
+    <div class="think-card reveal">
+      <div class="think-label">First Principles</div>
+      <div class="think-q">Why do most enterprise analytics dashboards go unused after launch?</div>
+      <div class="think-a">Because they're built around data availability, not decisions. The right starting question is: "what would you do differently if you knew X?" — and work backwards to metrics. At NALCO, I learned this firsthand. The ops team didn't want more data. They wanted one number that told them whether to act today.</div>
+    </div>
+    <div class="think-card reveal">
+      <div class="think-label">Design Sensibility</div>
+      <div class="think-q">What's a UX failure you think about often?</div>
+      <div class="think-a">Meeting recap tools that dump a wall of AI-generated text. The format misunderstands the use case — after a 60-minute call, nobody reads 800 words. The output should be three bullets + one action item, defaulting to what changes because of this meeting. Information hierarchy is a product decision, not a formatting one.</div>
+    </div>
+    <div class="think-card reveal">
+      <div class="think-label">Ownership Mindset</div>
+      <div class="think-q">How do you handle ambiguity without a PM to unblock you?</div>
+      <div class="think-a">I write down the decision I'm about to make, the assumption it rests on, and the cheapest way to test that assumption. Usually the answer is a 20-minute user conversation or a quick data pull — not a meeting. Ambiguity isn't blocked; it's an invitation to define the problem better than anyone else has yet.</div>
+    </div>
+  </div>
+</section>
+
+<!-- About -->
+<section id="about">
+  <div class="section-header reveal">
+    <span class="section-num">03</span>
+    <h2 class="section-title">About</h2>
+    <div class="section-rule"></div>
+  </div>
+
+  <div class="about-grid">
+    <div class="about-body reveal">
+      <p>
+        I'm a final-year CS student at <strong>KIIT University, Bhubaneswar</strong>, graduating in 2027. My technical foundation is in Python, SQL, and machine learning — but what I'm really chasing is the space where <span class="highlight">data meets decisions meets design.</span>
+      </p>
+      <p>
+        I've led end-to-end projects in energy, finance, and health — writing specs, coordinating teams, presenting to senior stakeholders, and iterating based on what actually got used. I think the best products come from people who can move between the technical and the human without losing clarity in either direction.
+      </p>
+      <p>
+        I'm drawn to AI-native products because they're genuinely hard: the interface for uncertainty, the ethics of automation, the question of when to show your work and when to just give the answer. <strong>These aren't UX problems. They're product problems.</strong>
+      </p>
+      <p>
+        Outside of work — I read voraciously, think in frameworks, and notice when things are 2 pixels off.
+      </p>
+    </div>
+    <div class="skills-block reveal">
+      <div class="skill-category">
+        <div class="skill-cat-label">Technical</div>
+        <div class="skill-tags">
+          <span class="tag">Python</span>
+          <span class="tag">SQL</span>
+          <span class="tag">Power BI</span>
+          <span class="tag">Deep Learning</span>
+          <span class="tag">NLP</span>
+          <span class="tag">Pandas</span>
+          <span class="tag">Scikit-learn</span>
+        </div>
+      </div>
+      <div class="skill-category">
+        <div class="skill-cat-label">Product & Strategy</div>
+        <div class="skill-tags">
+          <span class="tag">PRD Writing</span>
+          <span class="tag">User Research</span>
+          <span class="tag">Metrics Design</span>
+          <span class="tag">Roadmapping</span>
+          <span class="tag">Stakeholder Comms</span>
+        </div>
+      </div>
+      <div class="skill-category">
+        <div class="skill-cat-label">Credentials</div>
+        <div class="skill-tags">
+          <span class="tag">Accenture Forage</span>
+          <span class="tag">London Business School</span>
+          <span class="tag">SheFi Traineeship</span>
+          <span class="tag">SAI MUN Delegate</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="contact">
+  <div class="cta-bg"></div>
+  <div class="cta-eyebrow">Open to Opportunities</div>
+  <h2 class="cta-headline">Let's build<br /><em>something sharp.</em></h2>
+  <p class="cta-sub">If you're working on a product that deserves rigorous thinking and pixel-precise taste, I'd like to talk.</p>
+  <div class="cta-buttons">
+    <a href="mailto:mynamansha1707@gmail.com" class="btn btn-primary">mynamansha1707@gmail.com →</a>
+    <a href="https://www.linkedin.com/in/myna-mansha-539a7b24b/" class="btn btn-ghost">LinkedIn ↗</a>
+  </div>
+</section>
+
+<footer>
+  <p>© 2025 Myna Mansha · KIIT University · Bhubaneswar</p>
+  <p>Designed with intention.</p>
+</footer>
+
+<script>
+  // Cursor
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+  });
+  document.querySelectorAll('a, button, .think-card, .work-item').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('big'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
